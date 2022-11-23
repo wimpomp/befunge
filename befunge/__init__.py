@@ -75,10 +75,11 @@ class Grid(dict):
         self._ip[1] = self.wrap(value, 1)
 
     def __getitem__(self, key):
-        return self.get(key, ' ')
+        return self.get(key, ord(' '))
 
     def __setitem__(self, key, value):
-        super().__setitem__(tuple(self.wrap(k, i) for i, k in enumerate(key)), value)
+        super().__setitem__(tuple(self.wrap(k, i) for i, k in enumerate(key)),
+                            ord(value) if isinstance(value, str) else value)
 
     def __repr__(self):
         lines = []
@@ -87,7 +88,7 @@ class Grid(dict):
                 lines.append([])
             while len(lines[y]) <= x:
                 lines[y].append(' ')
-            lines[y][x] = value
+            lines[y][x] = chr(value) if 32 <= value <= 126 or 161 <= value <= 255 else chr(164)
         lines = [''.join(line) for line in lines]
         if self.cursor:
             return '\n'.join(lines[:self.y] +
@@ -157,7 +158,9 @@ class Befunge(Grid):
         return self
 
     def __next__(self):
-        return self.step()
+        if self.step().terminated:
+            raise StopIteration
+        return self
 
     def run(self):
         for _ in self:
@@ -208,17 +211,15 @@ class Befunge(Grid):
             pass
 
     def step(self, n=1):
-        if self.terminated:
-            raise StopIteration
         m = 0
         while m < n:
             if self.string:
-                if self.op == '"':
+                if self.op == ord('"'):
                     self.string = False
                 else:
-                    self.stack.push(ord(self.op))
-            elif self.op in self.operations:
-                match self.op:
+                    self.stack.push(self.op)
+            elif chr(self.op) in self.operations:
+                match chr(self.op):
                     case '+':
                         self.stack.push(self.stack.pop() + self.stack.pop())
                     case '-':
@@ -268,16 +269,15 @@ class Befunge(Grid):
                     case '#':
                         self.advance()
                     case 'p':
-                        self[self.stack.pop(-2), self.stack.pop()] = chr(self.stack.pop())
+                        self[self.stack.pop(-2), self.stack.pop()] = self.stack.pop(-3)
                     case 'g':
-                        self.stack.push(ord(self[self.stack.pop(-2), self.stack.pop()]))
+                        self.stack.push(self[self.stack.pop(-2), self.stack.pop()])
                     case '&':
                         self.stack.push(int(self.input()))
                     case '~':
                         self.stack.push(ord(self.input()))
                     case '@':
                         self.terminated = True
-                        break
                     case ' ':
                         pass
                     case op:
@@ -285,7 +285,7 @@ class Befunge(Grid):
             else:
                 raise OperatorException(self.op)
             self.advance()
-            if not (not self.string and self.op == ' '):
+            if not (not self.string and self.op == ord(' ')):
                 m += 1
                 self.steps += 1
         return self
