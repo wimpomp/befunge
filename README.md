@@ -1,6 +1,5 @@
 # Befunge
-[Befunge](https://en.wikipedia.org/wiki/Befunge) interpreter and debugger for Befunge 93,
-the first of the [Funges](https://web.archive.org/web/20041225010717/http://quadium.net/funge/spec98.html).
+[Befunge](https://en.wikipedia.org/wiki/Befunge) interpreter and debugger for Befunge 93/98: [Funges](https://github.com/catseye/Funge-98/blob/master/doc/funge98.markdown#Whatis).
 
 ## Installation
 `pip install befunge@git+https://github.com/wimpomp/befunge.git`
@@ -9,4 +8,4 @@ the first of the [Funges](https://web.archive.org/web/20041225010717/http://quad
 `befunge --help`
 
 ## Examples
-`befunge examples/factorial0.bf -i 20 -d 0.05`
+`befunge examples/factorial0.bf 20 -d 0.05`

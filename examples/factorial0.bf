@@ -1,5 +1,5 @@
+#!/usr/bin/env befunge
 v
-0
 &
 >>:1v
  |:-<
